@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Video Player</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .video-container {
+            width: 80%;
+            max-width: 800px;
+            position: relative;
+        }
+        video {
+            width: 100%;
+            border-radius: 10px;
+        }
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="video-container">
+        <video id="videoPlayer" controls>
+            <source src="Dog.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        <div class="overlay" id="gestureArea"></div>
+    </div>
+
+    <script>
+        const video = document.getElementById("videoPlayer");
+        const gestureArea = document.getElementById("gestureArea");
+        let tapCount = 0;
+        let lastTapTime = 0;
+        let currentVideoIndex = 0;
+        const videoList = ["video1.mp4", "video2.mp4", "video3.mp4"];
+
+        gestureArea.addEventListener("click", (event) => {
+            const now = Date.now();
+            const tapInterval = now - lastTapTime;
+
+            if (tapInterval < 300) {
+                tapCount++;
+            } else {
+                tapCount = 1;
+            }
+            lastTapTime = now;
+
+            setTimeout(() => {
+                handleGesture(event);
+                tapCount = 0;
+            }, 350);
+        });
+
+        function handleGesture(event) {
+            const width = gestureArea.clientWidth;
+            const x = event.clientX;
+            const region = x < width * 0.33 ? "left" : x > width * 0.66 ? "right" : "middle";
+
+            if (tapCount === 1 && region === "middle") {
+                video.paused ? video.play() : video.pause();
+            } else if (tapCount === 2 && region === "right") {
+                video.currentTime = Math.min(video.duration, video.currentTime + 10);
+            } else if (tapCount === 2 && region === "left") {
+                video.currentTime = Math.max(0, video.currentTime - 10);
+            } else if (tapCount === 3 && region === "middle") {
+                moveToNextVideo();
+            } else if (tapCount === 3 && region === "right") {
+                window.close();
+            } else if (tapCount === 3 && region === "left") {
+                alert("Showing comment section!");
+            }
+        }
+
+        function moveToNextVideo() {
+            if (currentVideoIndex < videoList.length - 1) {
+                currentVideoIndex++;
+                video.src = videoList[currentVideoIndex];
+                video.play();
+            } else {
+                alert("No more videos available!");
+            }
+        }
+    </script>
+
+</body>
+</html>
